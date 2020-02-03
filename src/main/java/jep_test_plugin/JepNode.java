@@ -17,10 +17,7 @@ import org.xml.sax.SAXException;
 
 import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 import static com.clt.diamant.graph.nodes.AbstractInputNode.findMatch;
@@ -31,6 +28,9 @@ public class JepNode extends Node {
     /** variable to store the result in */
     private static final String RESULT_VAR = "resultVar";
 
+    private static Map<String,File> scriptFilenamesToTmpFilenames = new HashMap<>();
+
+    private JepConfig jc = new JepConfig();
 
 
     public JepNode() {
@@ -40,16 +40,15 @@ public class JepNode extends Node {
 
     @Override
     public Node execute(WozInterface comm, InputCenter input, ExecutionLogger logger) {
-        InputStream is = JepNode.class.getClassLoader().getResourceAsStream(getFilename());
-        String script = slurp(new InputStreamReader(is));
+//        InputStream is = JepNode.class.getClassLoader().getResourceAsStream(getFilename());
+//        String script = slurp(new InputStreamReader(is));
+//
+//        System.err.println(script);
 
-        System.err.println(script);
-
-        JepConfig jc = new JepConfig();
-        jc.setInteractive(false);
 
         try (Jep interp = jc.createSubInterpreter()) {
-            interp.eval(script);
+            File scriptFile = mkTemporaryFile(getFilename());
+            interp.runScript(scriptFile.getAbsolutePath());
 //
 //
 //            interp.exec("from java.lang import System");
@@ -57,11 +56,33 @@ public class JepNode extends Node {
 //            interp.exec("System.out.println(s)");
 //            interp.exec("print(s)");
 //            interp.exec("print(s[1:-1])");
-        } catch (JepException e) {
+        } catch (JepException|IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return getOutEdges().get(0).getTarget();
+    }
+
+    private File mkTemporaryFile(String scriptFilename) throws IOException {
+        File ret = scriptFilenamesToTmpFilenames.get(scriptFilename);
+
+        if( ret == null ) {
+            ret = File.createTempFile("dialogos_python_script", ".py");
+            ret.deleteOnExit();
+            scriptFilenamesToTmpFilenames.put(scriptFilename, ret);
+
+//            System.err.printf("Create new tmp file %s for script name %s ...\n", ret.getAbsolutePath(), scriptFilename);
+
+            InputStream is = JepNode.class.getClassLoader().getResourceAsStream(scriptFilename);
+            String script = slurp(new InputStreamReader(is));
+
+            try(PrintWriter w = new PrintWriter(new FileWriter(ret))) {
+                w.println(script);
+            }
+        }
+
+        return ret;
     }
 
     private String getFilename() {
