@@ -1,0 +1,34 @@
+plugins {
+  id 'java'
+  id 'maven'
+  id 'application'
+}
+
+repositories {
+  mavenLocal()
+  jcenter()
+  maven { url "https://jitpack.io" }
+}
+
+configurations {
+  implementation.exclude group: 'de.dfki.mary', module: 'marytts-lang-de'
+  implementation.exclude group: 'de.dfki.mary', module: 'marytts-runtime'
+}
+
+
+dependencies {
+  compile group: 'black.ninia', name: 'jep', version: '3.9.0'
+
+  implementation(group:'com.github.dialogos-project', name:'dialogos', version:'2.1.4-SNAPSHOT') {
+    exclude module: 'DialogOS_SphinxPlugin'
+    exclude module: 'DialogOS_MaryTTSPlugin'
+  }
+
+  runtime group:'com.github.dialogos-project', name:'dialogos', version:'2.1.4-SNAPSHOT' // more fun to test with plugins
+}
+
+mainClassName = 'com.clt.dialogos.DialogOS'
+def version = 1.0
+run {
+  standardInput = System.in
+}
