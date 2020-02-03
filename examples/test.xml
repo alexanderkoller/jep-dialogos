@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wizard SYSTEM "Wizard.dtd">
+
+<wizard>
+	<plugin type="jep_test_plugin">
+	</plugin>
+	<graph directed="1" Graphic="1" Layout="points">
+		<att name="width" type="integer" value="750"/>
+		<att name="height" type="integer" value="540"/>
+		<groovyFunctions></groovyFunctions>
+		<variable uid="35ae4055-10cf-40cd-8d0e-fc9ade1ad808">
+			<name>x</name>
+			<type>string</type>
+			<value>&quot;this is x&quot;</value>
+		</variable>
+		<node uid="346b7044-4ffd-41f0-9621-fb4417ea6f8d" class="com.clt.diamant.graph.nodes.StartNode">
+			<graphics x="370" y="40" fill="#9999ff"/>
+			<att name="title" type="string" value="Start"/>
+		</node>
+		<node uid="499ed3e4-f0ae-4a67-857d-122023808765" class="jep_test_plugin.JepNode">
+			<graphics x="373" y="136" fill="#c0c0c0"/>
+			<att name="title" type="string" value="Jep"/>
+			<att name="filename" type="string" value="python/plugin.py"/>
+		</node>
+		<node uid="e4ab7e75-f927-4cde-8610-414e3c2c7623" class="com.clt.diamant.graph.nodes.EndNode">
+			<graphics x="366" y="228" fill="#9999ff"/>
+			<att name="title" type="string" value="End"/>
+		</node>
+		<edge src="346b7044-4ffd-41f0-9621-fb4417ea6f8d" tgt="499ed3e4-f0ae-4a67-857d-122023808765">
+		</edge>
+		<edge src="499ed3e4-f0ae-4a67-857d-122023808765" tgt="e4ab7e75-f927-4cde-8610-414e3c2c7623">
+		</edge>
+	</graph>
+</wizard>

@@ -3,28 +3,26 @@ package jep_test_plugin;
 import com.clt.diamant.*;
 import com.clt.diamant.graph.Graph;
 import com.clt.diamant.graph.Node;
-import com.clt.diamant.graph.nodes.AbstractInputNode;
-import com.clt.diamant.graph.nodes.NodeExecutionException;
 import com.clt.diamant.gui.NodePropertiesDialog;
-import com.clt.script.exp.Pattern;
-import com.clt.script.exp.patterns.VarPattern;
-import com.clt.speech.recognition.*;
-import com.clt.srgf.Grammar;
+import com.clt.script.exp.Value;
+import com.clt.script.exp.values.IntValue;
+import com.clt.script.exp.values.StringValue;
 import com.clt.xml.XMLReader;
 import com.clt.xml.XMLWriter;
-import jep.*;
+import com.sun.jdi.LongValue;
+import jep.Jep;
+import jep.JepConfig;
+import jep.JepException;
 import org.xml.sax.SAXException;
 
-import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
 import java.io.*;
-import java.util.*;
-
-import static com.clt.diamant.graph.nodes.AbstractInputNode.findMatch;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JepNode extends Node {
-    /** actually, a query expression */
-    public static final String FILENAME = "filename";
+    public static final String SCRIPT_FILENAME = "filename";
     /** variable to store the result in */
     private static final String RESULT_VAR = "resultVar";
 
@@ -40,28 +38,34 @@ public class JepNode extends Node {
 
     @Override
     public Node execute(WozInterface comm, InputCenter input, ExecutionLogger logger) {
-//        InputStream is = JepNode.class.getClassLoader().getResourceAsStream(getFilename());
-//        String script = slurp(new InputStreamReader(is));
-//
-//        System.err.println(script);
-
+        List<Slot> variables = getGraph().getVariables();
 
         try (Jep interp = jc.createSubInterpreter()) {
-            File scriptFile = mkTemporaryFile(getFilename());
+            setVariables(interp, variables);
+            File scriptFile = mkTemporaryFile(getScriptFilename());
             interp.runScript(scriptFile.getAbsolutePath());
-//
-//
-//            interp.exec("from java.lang import System");
-//            interp.exec("s = 'Hello World'");
-//            interp.exec("System.out.println(s)");
-//            interp.exec("print(s)");
-//            interp.exec("print(s[1:-1])");
         } catch (JepException|IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
 
         return getOutEdges().get(0).getTarget();
+    }
+
+    private void setVariables(Jep jep, List<? extends AbstractVariable> variables) throws JepException {
+        for( AbstractVariable variable : variables ) {
+            Object value = variable.getValue();
+
+            if( value instanceof StringValue ) {
+                value = ((StringValue) value).getString();
+            } else if( value instanceof IntValue ) {
+                value = ((IntValue) value).getInt();
+            } else if( value instanceof Value ) {
+                throw new UnsupportedOperationException("Unsupported DialogOS Value type: " + value.getClass());
+            }
+
+            jep.set(variable.getName(), value);
+        }
     }
 
     private File mkTemporaryFile(String scriptFilename) throws IOException {
@@ -85,8 +89,8 @@ public class JepNode extends Node {
         return ret;
     }
 
-    private String getFilename() {
-        return (String) properties.get(FILENAME);
+    private String getScriptFilename() {
+        return (String) properties.get(SCRIPT_FILENAME);
     }
 
 
@@ -101,7 +105,7 @@ public class JepNode extends Node {
 
         JPanel horiz = new JPanel();
         horiz.add(new JLabel("Python script to execute"));
-        horiz.add(NodePropertiesDialog.createTextField(properties, FILENAME));
+        horiz.add(NodePropertiesDialog.createTextField(properties, SCRIPT_FILENAME));
         p.add(horiz);
 
         horiz = new JPanel();
@@ -116,13 +120,13 @@ public class JepNode extends Node {
     protected void writeAttributes(XMLWriter out, IdMap uid_map) {
         super.writeAttributes(out, uid_map);
 
-        Graph.printAtt(out, FILENAME, getFilename());
+        Graph.printAtt(out, SCRIPT_FILENAME, getScriptFilename());
     }
 
     @Override
     protected void readAttribute(XMLReader r, String name, String value, IdMap uid_map) throws SAXException {
-        if( FILENAME.equals(name)) {
-            setProperty(FILENAME, value);
+        if( SCRIPT_FILENAME.equals(name)) {
+            setProperty(SCRIPT_FILENAME, value);
         } else {
             super.readAttribute(r, name, value, uid_map);
         }
