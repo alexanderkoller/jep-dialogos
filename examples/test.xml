@@ -21,14 +21,22 @@
 			<graphics x="373" y="136" fill="#c0c0c0"/>
 			<att name="title" type="string" value="Jep"/>
 			<att name="filename" type="string" value="python/plugin.py"/>
+			<att name="resultVar" type="string" value="x"/>
+		</node>
+		<node uid="84b3efc5-f4d6-4971-a238-c4986c62bca1" class="jep_test_plugin.JepNode">
+			<graphics x="389" y="254" fill="#c0c0c0"/>
+			<att name="title" type="string" value="Jep"/>
+			<att name="filename" type="string" value="python/plugin.py"/>
 		</node>
 		<node uid="e4ab7e75-f927-4cde-8610-414e3c2c7623" class="com.clt.diamant.graph.nodes.EndNode">
-			<graphics x="366" y="228" fill="#9999ff"/>
+			<graphics x="364" y="369" fill="#9999ff"/>
 			<att name="title" type="string" value="End"/>
 		</node>
 		<edge src="346b7044-4ffd-41f0-9621-fb4417ea6f8d" tgt="499ed3e4-f0ae-4a67-857d-122023808765">
 		</edge>
-		<edge src="499ed3e4-f0ae-4a67-857d-122023808765" tgt="e4ab7e75-f927-4cde-8610-414e3c2c7623">
+		<edge src="499ed3e4-f0ae-4a67-857d-122023808765" tgt="84b3efc5-f4d6-4971-a238-c4986c62bca1">
+		</edge>
+		<edge src="84b3efc5-f4d6-4971-a238-c4986c62bca1" tgt="e4ab7e75-f927-4cde-8610-414e3c2c7623">
 		</edge>
 	</graph>
 </wizard>
