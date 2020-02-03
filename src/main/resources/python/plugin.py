@@ -1,5 +1,3 @@
 
-def execute():
-    print("hello")
-
-
+print("hello")
+System.out.println("hello2")
